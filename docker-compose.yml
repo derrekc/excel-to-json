@@ -1,0 +1,19 @@
+version: '3.7'
+
+services:
+  app:
+    stdin_open: true
+
+    tty: true
+
+    container_name: excellent-app
+
+    build: .
+
+    volumes:
+      - type: bind
+        source: ${HOME}/.netrc
+        target: /root/.netrc
+
+    ports:
+      - "4000:4000"
