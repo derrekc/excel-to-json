@@ -28,9 +28,6 @@ func main() {
 		}
 		fmt.Printf("--------START ROW [%d]---------\n", i)
 		recommendationSvc.AddRecommendationFromSpreadsheetRow(row)
-		//for _, colCell := range row {
-		//	fmt.Print("[colCell] ", colCell, "\t\n")
-		//}
 		fmt.Println("-------------/ROW-------------")
 		fmt.Println()
 	}

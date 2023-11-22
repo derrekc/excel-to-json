@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"strings"
-	"time"
 )
 
 // Recommendation will be translated to JSON format
@@ -11,7 +10,7 @@ type Recommendation struct {
 	Title              string
 	Description        string
 	Source             string
-	RecommendationDate time.Time
+	RecommendationDate string
 	Category           string
 	EGDecision         string
 	ResponsibleParty   string
@@ -26,7 +25,7 @@ func (r Recommendation) String() string {
 	b.WriteString(fmt.Sprintf("Title: %s\n", r.Title))
 	b.WriteString(fmt.Sprintf("Recommendation:\n%s\n", r.Description))
 	b.WriteString(fmt.Sprintf("Source: %s\n", r.Source))
-	b.WriteString(fmt.Sprintf("Recommendation Date: coming soon\n"))
+	b.WriteString(fmt.Sprintf("Recommendation Date: %s\n", r.RecommendationDate))
 	b.WriteString(fmt.Sprintf("Category: %s\n", r.Category))
 	b.WriteString(fmt.Sprintf("EG Decision: %s\n", r.EGDecision))
 	b.WriteString(fmt.Sprintf("Responsible Party/Parties: %s\n", r.ResponsibleParty))
@@ -39,17 +38,17 @@ func (r Recommendation) String() string {
 
 // RowTitle for later use
 const (
-	RowTitle              = 0x0000
-	RowDescription        = 0x0001
-	RowSource             = 0x0002
-	RowRecommendationDate = 0x0003
-	RowCategory           = 0x0004
-	RowEGDecision         = 0x0005
-	RowResponsibleParty   = 0x0006
-	RowCurrentStatus      = 0x0007
-	RowProgressToDate     = 0x0008
-	RowCampusPartnerships = 0x0009
-	RowExtra              = 0x000a
+	RowTitle              = 0x00
+	RowDescription        = 0x01
+	RowSource             = 0x02
+	RowRecommendationDate = 0x03
+	RowCategory           = 0x04
+	RowEGDecision         = 0x05
+	RowResponsibleParty   = 0x06
+	RowCurrentStatus      = 0x07
+	RowProgressToDate     = 0x08
+	RowCampusPartnerships = 0x09
+	RowExtra              = 0x0a
 )
 
 // RecommendationService manages those Recommendations
@@ -65,11 +64,11 @@ func NewRecommendationService() *RecommendationService {
 // AddRecommendationFromSpreadsheetRow accepts a row of spreadsheet
 // cell data
 func (rs *RecommendationService) AddRecommendationFromSpreadsheetRow(row []string) {
-	fmt.Println("column count: ", len(row))
 	r := Recommendation{}
 	r.Title = row[RowTitle]
 	r.Description = row[RowDescription]
 	r.Source = row[RowSource]
+	r.RecommendationDate = row[RowRecommendationDate]
 	r.Category = row[RowCategory]
 	r.EGDecision = row[RowEGDecision]
 
