@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/xuri/excelize/v2"
 )
@@ -31,5 +32,7 @@ func main() {
 		fmt.Println("-------------/ROW-------------")
 		fmt.Println()
 	}
-	fmt.Printf("Number of rows is %d\n", len(rows))
+	w := os.Stdout
+	recommendationSvc.WriteJSON(w)
+	fmt.Printf("Number of rows: %d\n", len(rows))
 }

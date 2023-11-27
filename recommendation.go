@@ -1,22 +1,26 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"os"
+	"regexp"
 	"strings"
 )
 
 // Recommendation will be translated to JSON format
 type Recommendation struct {
-	Title              string
-	Description        string
-	Source             string
-	RecommendationDate string
-	Category           string
-	EGDecision         string
-	ResponsibleParty   string
-	CurrentStatus      string
-	ProgressToDate     string
-	CampusPartnerships string
+	Title              string `json:"title"`
+	Description        string `json:"body"`
+	Source             string `json:"source"`
+	RecommendationDate string `json:"recommendation_date"`
+	Category           string `json:"recommendation_category"`
+	EGDecision         string `json:"eg_decision"`
+	ResponsibleParty   string `json:"responsible_party"`
+	CurrentStatus      string `json:"current_status"`
+	ProgressToDate     string `json:"recommendation_progress"`
+	CampusPartnerships string `json:"campus_partnerships"`
 }
 
 // String pretty-prints the recommendation
@@ -53,12 +57,15 @@ const (
 
 // RecommendationService manages those Recommendations
 type RecommendationService struct {
-	Recommendations []Recommendation
+	Recommendations []Recommendation  `json:"recommendations"`
+	CategoryTerms   map[string]string `json:"category_terms"`
 }
 
 // NewRecommendationService can be called from main or within a DIG container
 func NewRecommendationService() *RecommendationService {
-	return &RecommendationService{}
+	return &RecommendationService{
+		CategoryTerms: map[string]string{},
+	}
 }
 
 // AddRecommendationFromSpreadsheetRow accepts a row of spreadsheet
@@ -70,6 +77,8 @@ func (rs *RecommendationService) AddRecommendationFromSpreadsheetRow(row []strin
 	r.Source = row[RowSource]
 	r.RecommendationDate = row[RowRecommendationDate]
 	r.Category = row[RowCategory]
+	rs.captureCategoryTerms(r.Category)
+	rs.CategoryTerms[r.Category] = "y"
 	r.EGDecision = row[RowEGDecision]
 
 	if len(row) > RowResponsibleParty {
@@ -90,4 +99,30 @@ func (rs *RecommendationService) AddRecommendationFromSpreadsheetRow(row []strin
 
 	rs.Recommendations = append(rs.Recommendations, r)
 	fmt.Println(r)
+}
+
+func (rs *RecommendationService) captureCategoryTerms(t string) {
+	re := regexp.MustCompile(",\\s?")
+	split := re.Split(t, -1)
+	set := []string{}
+	for i := range split {
+		set = append(set, split[i])
+	}
+	fmt.Println(set)
+}
+
+// WriteJSON to some io.Writer, writer, provided by the caller.
+// If "writer" is null, print to stdout
+func (rs *RecommendationService) WriteJSON(w io.Writer) {
+	if w == nil {
+		w = os.Stdout
+	}
+
+	resultB, _ := json.MarshalIndent(rs, "", "  ")
+	io.WriteString(w, string(resultB))
+	//for _, row := range rs.Recommendations {
+	//	resultA, _ := json.MarshalIndent(row, "", "  ")
+	//	io.WriteString(w, string(resultA))
+	//	io.WriteString(w, "\n")
+	//}
 }
