@@ -57,14 +57,16 @@ const (
 
 // RecommendationService manages those Recommendations
 type RecommendationService struct {
-	Recommendations []Recommendation  `json:"recommendations"`
-	CategoryTerms   map[string]string `json:"category_terms"`
+	Recommendations       []Recommendation  `json:"recommendations"`
+	CategoryTerms         map[string]string `json:"category_terms"`
+	ResponsiblePartyTerms map[string]string `json:"responsible_party_terms"`
 }
 
 // NewRecommendationService can be called from main or within a DIG container
 func NewRecommendationService() *RecommendationService {
 	return &RecommendationService{
-		CategoryTerms: map[string]string{},
+		CategoryTerms:         map[string]string{},
+		ResponsiblePartyTerms: map[string]string{},
 	}
 }
 
@@ -75,14 +77,14 @@ func (rs *RecommendationService) AddRecommendationFromSpreadsheetRow(row []strin
 	r.Title = row[RowTitle]
 	r.Description = row[RowDescription]
 	r.Source = row[RowSource]
-	r.RecommendationDate = row[RowRecommendationDate]
+	r.RecommendationDate = correctedDateString(row[RowRecommendationDate])
 	r.Category = row[RowCategory]
-	rs.captureCategoryTerms(r.Category)
-	rs.CategoryTerms[r.Category] = "y"
+	rs.captureTerms("CategoryTerms", r.Category)
 	r.EGDecision = row[RowEGDecision]
 
 	if len(row) > RowResponsibleParty {
 		r.ResponsibleParty = row[RowResponsibleParty]
+		rs.captureTerms("ResponsiblePartyTerms", r.ResponsibleParty)
 	}
 
 	if len(row) > RowCurrentStatus {
@@ -98,17 +100,21 @@ func (rs *RecommendationService) AddRecommendationFromSpreadsheetRow(row []strin
 	}
 
 	rs.Recommendations = append(rs.Recommendations, r)
-	fmt.Println(r)
 }
 
-func (rs *RecommendationService) captureCategoryTerms(t string) {
+func (rs *RecommendationService) captureTerms(which string, t string) {
+	var pMap map[string]string
+
+	if which == "CategoryTerms" {
+		pMap = rs.CategoryTerms
+	} else if which == "ResponsiblePartyTerms" {
+		pMap = rs.ResponsiblePartyTerms
+	}
 	re := regexp.MustCompile(",\\s?")
 	split := re.Split(t, -1)
-	set := []string{}
 	for i := range split {
-		set = append(set, split[i])
+		pMap[split[i]] = "y"
 	}
-	fmt.Println(set)
 }
 
 // WriteJSON to some io.Writer, writer, provided by the caller.
@@ -120,9 +126,17 @@ func (rs *RecommendationService) WriteJSON(w io.Writer) {
 
 	resultB, _ := json.MarshalIndent(rs, "", "  ")
 	io.WriteString(w, string(resultB))
-	//for _, row := range rs.Recommendations {
-	//	resultA, _ := json.MarshalIndent(row, "", "  ")
-	//	io.WriteString(w, string(resultA))
-	//	io.WriteString(w, "\n")
-	//}
+}
+
+func correctedDateString(ds string) string {
+	var splits []string
+	dayOfMonth := "01"
+
+	r, _ := regexp.Compile("^\\d{4}")
+	if r.MatchString(ds) {
+		splits = strings.Split(ds, "-")
+		return fmt.Sprintf("%s-%s-%s", splits[0], splits[1], dayOfMonth)
+	}
+
+	return ds
 }

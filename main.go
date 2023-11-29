@@ -27,10 +27,7 @@ func main() {
 		if i == 0 {
 			continue
 		}
-		fmt.Printf("--------START ROW [%d]---------\n", i)
 		recommendationSvc.AddRecommendationFromSpreadsheetRow(row)
-		fmt.Println("-------------/ROW-------------")
-		fmt.Println()
 	}
 	w := os.Stdout
 	recommendationSvc.WriteJSON(w)
