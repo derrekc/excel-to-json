@@ -80,6 +80,7 @@ func (rs *RecommendationService) AddRecommendationFromSpreadsheetRow(row []strin
 	r.RecommendationDate = correctedDateString(row[RowRecommendationDate])
 	r.Category = row[RowCategory]
 	rs.captureTerms("CategoryTerms", r.Category)
+
 	r.EGDecision = row[RowEGDecision]
 
 	if len(row) > RowResponsibleParty {
