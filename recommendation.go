@@ -129,6 +129,8 @@ func (rs *RecommendationService) WriteJSON(w io.Writer) {
 	io.WriteString(w, string(resultB))
 }
 
+// Return a date string suitable for using with a
+// Drupal "date" field (in this case, 'YYYY-MM-DD')
 func correctedDateString(ds string) string {
 	var splits []string
 	dayOfMonth := "01"
